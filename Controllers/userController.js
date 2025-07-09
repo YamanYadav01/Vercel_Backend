@@ -45,14 +45,18 @@ export const Signup = async(req,res)=>{
 
 export const SignIn = async(req,res)=>{
     try{
-      const {email, password} = req.body;
-
-      if(!email||!password){
-        return res.status(400).json({message: "All fileds are required"})
-      }
-
-      const existUser = await User.findOne({email})
-      if(existUser){
+        const {email, password} = req.body;
+        console.log(email,password)
+        
+        if(!email||!password){
+            return res.status(400).json({message: "All fileds are required"})
+        }
+        
+        console.log("ok")
+        const existUser = await User.findOne({email})
+        console.log(existUser)
+        if(existUser){
+            console.log("matched")
         const isMatch = bcrypt.compareSync(password, existUser.password);
         if(isMatch){
             console.log(email,password)
@@ -69,11 +73,13 @@ export const SignIn = async(req,res)=>{
                 sameSite: 'None', // Important for cross-origin cookies
                 expires: new Date(Date.now() + 3600000), // 1-hour expiry
             });
+            console.log(res)
             
             // console.log("Cookies after setting:", req.cookies);
             return res.status(200).json({message:"user are successfully Login", email:email})
+        }
+        return res.status(200).json({message:"user are successfully Login", email:email})
         } 
-      }
     }catch(error){
         return res.status(500).json({message:"server error", error:error.message})
     }
@@ -94,10 +100,12 @@ export const Posts = async(req,res)=>{
        res.status(200).json({data:postData})
 } 
 export const userPosts = async(req,res)=>{
-    const {userId} = req.params;
-           console.log("userid:",userId)
-     const postData = await File.find({userId});
-     res.status(200).json({res:postData.length})
+    const email = req.params.userId;
+    // console.log(email)
+           console.log("userid:",email)
+     const postData = await User.findOne({email});
+     console.log("postData",postData)
+     res.status(200).json({postData})
 }
 
 export const likedata = async(req,res)=>{
@@ -261,7 +269,7 @@ export const followedUsers = async (req, res) => {
     }
 };
 
-// all users
+// all user
 export const Users = async(req,res)=>{
        console.log("users")
        const users = await User.find();
